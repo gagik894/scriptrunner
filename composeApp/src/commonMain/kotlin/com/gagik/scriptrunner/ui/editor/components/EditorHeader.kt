@@ -1,4 +1,4 @@
-package com.gagik.scriptrunner.ui.editor
+package com.gagik.scriptrunner.ui.editor.components
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -23,18 +22,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +39,8 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.gagik.scriptrunner.domain.models.RunState
+import com.gagik.scriptrunner.domain.models.ScriptLanguage
 import com.gagik.scriptrunner.ui.theme.AppTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -54,9 +48,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun EditorHeader(
     modifier: Modifier = Modifier,
     runState: RunState,
-    supportedLanguages: List<String>,
-    selectedLanguage: String,
-    onLanguageSelected: (String) -> Unit,
+    selectedLanguage: ScriptLanguage,
+    onLanguageSelected: (ScriptLanguage) -> Unit,
     onRunClick: () -> Unit,
     onStopClick: () -> Unit,
 ) {
@@ -78,7 +71,6 @@ fun EditorHeader(
                 overflow = TextOverflow.Ellipsis,
             )
             LanguageSelector(
-                supportedLanguages = supportedLanguages,
                 onLanguageSelected = onLanguageSelected,
                 selectedLanguage = selectedLanguage,
             )
@@ -92,11 +84,7 @@ fun EditorHeader(
     }
 }
 
-enum class RunState {
-    IDLE,
-    RUNNING,
-    STOPPING,
-}
+
 
 @Composable
 private fun RunStopButton(
@@ -133,9 +121,8 @@ private fun RunStopButton(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LanguageSelector(
-    supportedLanguages: List<String>,
-    onLanguageSelected: (String) -> Unit,
-    selectedLanguage: String,
+    onLanguageSelected: (ScriptLanguage) -> Unit,
+    selectedLanguage: ScriptLanguage,
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -149,7 +136,7 @@ private fun LanguageSelector(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = selectedLanguage,
+                text = selectedLanguage.name,
                 style = MaterialTheme.typography.labelLarge,
             )
             Spacer(Modifier.width(4.dp))
@@ -168,9 +155,9 @@ private fun LanguageSelector(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            supportedLanguages.forEach { language ->
+            ScriptLanguage.entries.forEach { language ->
                 DropdownMenuItem(
-                    text = { Text(language) },
+                    text = { Text(language.name) },
                     onClick = {
                         expanded = false
                         onLanguageSelected(language)
@@ -192,9 +179,8 @@ private fun LanguageSelector(
 fun LanguageSelectorPreview() {
     AppTheme {
         LanguageSelector(
-            supportedLanguages = listOf("Kotlin", "Java", "JavaScript"),
             onLanguageSelected = {},
-            selectedLanguage = "Kotlin"
+            selectedLanguage = ScriptLanguage.KOTLIN
         )
     }
 }
@@ -218,8 +204,7 @@ fun EditorHeaderPreview() {
     AppTheme {
         EditorHeader(
             runState = RunState.IDLE,
-            supportedLanguages = listOf("Kotlin", "Java", "JavaScript"),
-            selectedLanguage = "Kotlin",
+            selectedLanguage = ScriptLanguage.KOTLIN,
             onLanguageSelected = {},
             onRunClick = {},
             onStopClick = {}

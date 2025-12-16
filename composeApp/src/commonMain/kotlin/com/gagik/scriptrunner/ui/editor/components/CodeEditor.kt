@@ -1,6 +1,5 @@
-package com.gagik.scriptrunner.ui.editor
+package com.gagik.scriptrunner.ui.editor.components
 
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -8,14 +7,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,38 +25,20 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.gagik.scriptrunner.domain.models.ScriptLanguage
 import com.gagik.scriptrunner.ui.components.AppVerticalScrollbar
+import com.gagik.scriptrunner.ui.editor.logic.CodeSyntaxHighlighter
+import com.gagik.scriptrunner.ui.editor.logic.rememberCodeEditorState
+import com.gagik.scriptrunner.ui.theme.AppTheme
 import com.gagik.scriptrunner.ui.theme.getJetBrainsMonoFontFamily
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-@Stable
-class CodeEditorState(
-    val verticalScrollState: ScrollState,
-    val horizontalScrollState: ScrollState
-) {
-    fun getVisibleWindow(lineHeightPx: Float, scrollOffsetPx: Int, viewportHeightPx: Float): Pair<Int, Int> {
-        if (lineHeightPx <= 0 || viewportHeightPx <= 0) return 0 to 0
-
-        val firstVisibleLine = (scrollOffsetPx / lineHeightPx).toInt().coerceAtLeast(0)
-        val visibleCount = (viewportHeightPx / lineHeightPx).toInt() + 4
-
-        return firstVisibleLine to visibleCount
-    }
-}
-@Composable
-fun rememberCodeEditorState(
-    verticalScrollState: ScrollState = rememberScrollState(),
-    horizontalScrollState: ScrollState = rememberScrollState()
-): CodeEditorState {
-    return remember(verticalScrollState, horizontalScrollState) {
-        CodeEditorState(verticalScrollState, horizontalScrollState)
-    }
-}
 
 @Composable
 fun CodeEditor(
     text: String,
     onValueChange: (String) -> Unit,
+    language: ScriptLanguage,
     modifier: Modifier = Modifier
 ) {
     val state = rememberCodeEditorState()
@@ -79,6 +58,10 @@ fun CodeEditor(
         lineHeight = lineHeight,
         color = MaterialTheme.colorScheme.onSurface
     )
+
+    val syntaxHighlighter = remember(language) {
+        CodeSyntaxHighlighter(language)
+    }
 
     Surface(
         modifier
@@ -117,7 +100,7 @@ fun CodeEditor(
                     value = text,
                     onValueChange = onValueChange,
                     textStyle = commonTextStyle,
-
+                    visualTransformation = syntaxHighlighter,
                     modifier = Modifier
                         .weight(1f)
                         .verticalScroll(state.verticalScrollState)
@@ -131,8 +114,6 @@ fun CodeEditor(
                 modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight()
             )
         }
-
-
     }
 }
 
@@ -171,9 +152,12 @@ private val sampleText = $$"""
 @Composable
 fun CodeEditorPreview() {
     var text by remember { mutableStateOf(sampleText) }
-    CodeEditor(
-        text = text,
-        onValueChange = { text = it },
-        modifier = Modifier.fillMaxSize()
-    )
+    AppTheme {
+        CodeEditor(
+            text = text,
+            onValueChange = { text = it },
+            language = ScriptLanguage.KOTLIN,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
 }

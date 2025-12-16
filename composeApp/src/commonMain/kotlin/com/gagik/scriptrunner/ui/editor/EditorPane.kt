@@ -4,15 +4,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.gagik.scriptrunner.domain.models.RunState
+import com.gagik.scriptrunner.domain.models.ScriptLanguage
+import com.gagik.scriptrunner.ui.editor.components.CodeEditor
+import com.gagik.scriptrunner.ui.editor.components.EditorHeader
 
 @Composable
 fun EditorPane(
     text: String,
-    language: String,
+    selectedLanguage: ScriptLanguage,
     runState: RunState,
-    supportedLanguages: List<String>,
     onTextChange: (String) -> Unit,
-    onLanguageChange: (String) -> Unit,
+    onLanguageChange: (ScriptLanguage) -> Unit,
     onRun: () -> Unit,
     onStop: () -> Unit,
     modifier: Modifier = Modifier
@@ -20,8 +23,7 @@ fun EditorPane(
     Column(modifier = modifier.fillMaxSize()) {
         EditorHeader(
             runState = runState,
-            supportedLanguages = supportedLanguages,
-            selectedLanguage = language,
+            selectedLanguage = selectedLanguage,
             onLanguageSelected = onLanguageChange,
             onRunClick = onRun,
             onStopClick = onStop
@@ -30,6 +32,7 @@ fun EditorPane(
         CodeEditor(
             text = text,
             onValueChange = onTextChange,
+            language = ScriptLanguage.KOTLIN,
             modifier = Modifier.weight(1f)
         )
     }
