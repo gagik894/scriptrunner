@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -23,10 +24,10 @@ fun LineNumberGutter(
     firstVisibleLineIndex: Int,
     visibleLineCount: Int,
     lineHeight: Dp,
+    textStyle: TextStyle,
     onLineNumberClick: (Int) -> Unit
 ) {
-    val endLineIndex =
-        (firstVisibleLineIndex + visibleLineCount).coerceAtMost(lineCount)
+    val endLineIndex = (firstVisibleLineIndex + visibleLineCount).coerceAtMost(lineCount)
 
     Layout(
         modifier = modifier.width(40.dp),
@@ -35,14 +36,14 @@ fun LineNumberGutter(
                 LineNumber(
                     lineNumber = i + 1,
                     lineHeight = lineHeight,
+                    style = textStyle,
                     onClick = { onLineNumberClick(i + 1) }
                 )
             }
         }
     ) { measurables, constraints ->
-
         val itemHeightPx = lineHeight.roundToPx()
-        val visibleHeightPx = itemHeightPx * (endLineIndex - firstVisibleLineIndex)
+        val totalHeight = itemHeightPx * lineCount
 
         val placeables = measurables.map {
             it.measure(
@@ -53,9 +54,11 @@ fun LineNumberGutter(
             )
         }
 
-        layout(constraints.maxWidth, visibleHeightPx) {
+        layout(constraints.maxWidth, totalHeight) {
             placeables.forEachIndexed { index, placeable ->
-                placeable.placeRelative(0, index * itemHeightPx)
+                val absoluteLineIndex = firstVisibleLineIndex + index
+                val y = absoluteLineIndex * itemHeightPx
+                placeable.placeRelative(0, y)
             }
         }
     }
@@ -65,11 +68,12 @@ fun LineNumberGutter(
 private fun LineNumber(
     lineNumber: Int,
     lineHeight: Dp,
+    style: TextStyle,
     onClick: () -> Unit
 ) {
     Text(
         text = lineNumber.toString(),
-        color = Color.Gray,
+        style = style,
         modifier = Modifier
             .fillMaxWidth()
             .height(lineHeight)
@@ -84,9 +88,10 @@ private fun LineNumber(
 fun LineNumberGutterPreview() {
     LineNumberGutter(
         lineCount = 100,
-        firstVisibleLineIndex = 9,
-        visibleLineCount = 15,
+        firstVisibleLineIndex = 0,
+        visibleLineCount = 20,
         lineHeight = 20.dp,
+        textStyle = TextStyle.Default,
         onLineNumberClick = {}
     )
 }
