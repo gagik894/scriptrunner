@@ -1,4 +1,4 @@
-package com.gagik.scriptrunner.ui.output
+package com.gagik.scriptrunner.ui.output.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
