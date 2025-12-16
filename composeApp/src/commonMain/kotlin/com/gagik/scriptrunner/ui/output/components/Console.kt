@@ -38,7 +38,7 @@ fun Console(
     SelectionContainer(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
         LazyColumn(
             state = listState,
@@ -71,7 +71,7 @@ private fun ConsoleLine(
             val lineNumber = match.groupValues[2].toIntOrNull() ?: 0
 
             withStyle(SpanStyle(color = Color(0xFFBBBBBB), fontFamily = fontFamily)) {
-                append(text.substring(0, match.range.first))
+                append(text.take(match.range.first))
             }
 
             val link = LinkAnnotation.Clickable(

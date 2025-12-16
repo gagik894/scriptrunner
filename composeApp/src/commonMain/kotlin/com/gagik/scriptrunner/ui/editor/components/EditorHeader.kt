@@ -55,7 +55,6 @@ fun EditorHeader(
 ) {
     Surface(
         tonalElevation = 4.dp,
-        color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Row(
             modifier = modifier
