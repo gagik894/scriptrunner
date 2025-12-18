@@ -21,7 +21,8 @@ class MainViewModel : ViewModel() {
                 Thread.sleep(1000)
                 println("Done.")
             }
-        """.trimIndent()
+        """.trimIndent(),
+            language = ScriptLanguage.KOTLIN
         )
     )
     val state = _state.asStateFlow()
