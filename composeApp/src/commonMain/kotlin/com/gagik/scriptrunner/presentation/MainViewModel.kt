@@ -6,6 +6,7 @@ import com.gagik.scriptrunner.domain.models.RunState
 import com.gagik.scriptrunner.domain.models.ScriptLanguage
 import com.gagik.scriptrunner.domain.models.ScriptOutput
 import com.gagik.scriptrunner.domain.usecase.RunScriptUseCase
+import com.gagik.scriptrunner.presentation.mappers.OutputMapper
 import com.gagik.scriptrunner.presentation.models.ConsoleUiLine
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -16,7 +17,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class MainViewModel(
-    private val runScriptUseCase: RunScriptUseCase
+    private val runScriptUseCase: RunScriptUseCase,
+    private val outputMapper: OutputMapper = OutputMapper()
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -93,30 +95,7 @@ class MainViewModel(
     }
 
     private fun handleScriptOutput(output: ScriptOutput) {
-        val uiLine = when (output) {
-            is ScriptOutput.Line -> {
-                ConsoleUiLine(
-                    text = output.text,
-                    type = if (output.isStdErr) ConsoleUiLine.Type.ERROR else ConsoleUiLine.Type.NORMAL,
-                    linkRange = output.linkRange,
-                    targetLineNumber = output.targetLineNumber
-                )
-            }
-
-            is ScriptOutput.Error -> {
-                ConsoleUiLine(
-                    text = output.message,
-                    type = ConsoleUiLine.Type.ERROR
-                )
-            }
-
-            is ScriptOutput.Exit -> {
-                ConsoleUiLine(
-                    text = "Process finished with exit code ${output.code}",
-                    type = ConsoleUiLine.Type.SYSTEM
-                )
-            }
-        }
+        val uiLine = outputMapper.map(output)
 
         _state.update {
             it.copy(outputLines = it.outputLines + uiLine)

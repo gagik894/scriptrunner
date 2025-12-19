@@ -32,7 +32,7 @@ fun EditorPane(
         CodeEditor(
             text = text,
             onValueChange = onTextChange,
-            language = ScriptLanguage.KOTLIN,
+            language = selectedLanguage,
             modifier = Modifier.weight(1f)
         )
     }

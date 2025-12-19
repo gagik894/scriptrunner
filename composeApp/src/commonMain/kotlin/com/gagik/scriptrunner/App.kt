@@ -73,7 +73,7 @@ fun MainScreen(
             OutputPane(
                 runState = state.runState,
                 exitCode = state.exitCode,
-                outputLines = emptyList(),
+                outputLines = state.outputLines,
                 onJumpToLine = { onIntent(MainIntent.JumpToLine(it)) },
                 modifier = Modifier.fillMaxSize()
             )
