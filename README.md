@@ -85,3 +85,14 @@ composeApp/
 
 > Note: Script execution is fully supported on **Desktop (JVM)** only.
 > Android and Web targets are included to demonstrate Multiplatform architecture.
+
+
+## Demo
+
+Here are some screenshots showing the editor, script execution, and error handling:
+
+![Kotlin standard output in the editor](docs/screenshot1.png)
+![Running a script with live output](docs/screenshot2.png)
+![Swift script in light theme](docs/screenshot3.png)
+![Compilation error highlighted and clickable](docs/screenshot5.png)
+![Runtime error displayed in vertical layout](docs/screenshot6.png)
