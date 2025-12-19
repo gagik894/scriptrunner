@@ -16,19 +16,24 @@ object ScriptTemplateProvider {
     fun getTemplate(language: ScriptLanguage): String {
         return when (language) {
             ScriptLanguage.KOTLIN -> """
-                // Kotlin Script - top-level code runs automatically
-                println("Hello from Kotlin!")
-                Thread.sleep(1000)
-                println("Done.")
-            """.trimIndent()
+            println("Hello from Kotlin!")
+            
+            println("Working...")
+            Thread.sleep(3000)
+            
+            println("Done.")
+        """.trimIndent()
 
             ScriptLanguage.SWIFT -> """
-                import Foundation
-                
-                print("Hello from Swift!")
-                Thread.sleep(forTimeInterval: 1.0)
-                print("Done.")
-            """.trimIndent()
+            import Foundation
+
+            print("Hello from Swift!")
+
+            print("Working...")
+            Thread.sleep(forTimeInterval: 3.0)
+
+            print("Done.")
+        """.trimIndent()
         }
     }
 }
