@@ -16,11 +16,10 @@ object ScriptTemplateProvider {
     fun getTemplate(language: ScriptLanguage): String {
         return when (language) {
             ScriptLanguage.KOTLIN -> """
-                fun main() {
-                    println("Hello from Kotlin!")
-                    Thread.sleep(1000)
-                    println("Done.")
-                }
+                // Kotlin Script - top-level code runs automatically
+                println("Hello from Kotlin!")
+                Thread.sleep(1000)
+                println("Done.")
             """.trimIndent()
 
             ScriptLanguage.SWIFT -> """

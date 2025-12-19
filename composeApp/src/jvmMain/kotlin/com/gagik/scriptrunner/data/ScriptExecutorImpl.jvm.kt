@@ -89,15 +89,25 @@ actual class ScriptExecutorImpl actual constructor() : ScriptExecutor {
 
     /**
      * Maps the [ScriptLanguage] to the appropriate system command.
-     * * Note: Assumes 'kotlinc' or 'swift' is available in the system environment PATH.
      *
      * @param language The programming language of the source code.
      * @param scriptFile The temporary file containing the source code.
      */
     private fun getCommandForLanguage(language: ScriptLanguage, scriptFile: File): List<String> {
+        val isWindows = System.getProperty("os.name").lowercase().contains("win")
+        
         return when (language) {
-            ScriptLanguage.KOTLIN -> listOf("kotlinc", "-script", scriptFile.absolutePath)
-            ScriptLanguage.SWIFT -> listOf("/usr/bin/env", "swift", scriptFile.absolutePath)
+            ScriptLanguage.KOTLIN -> {
+                if (isWindows) {
+                    // Use cmd /c to properly resolve kotlinc.bat from PATH
+                    listOf("cmd", "/c", "kotlinc", "-script", scriptFile.absolutePath)
+                } else {
+                    listOf("kotlinc", "-script", scriptFile.absolutePath)
+                }
+            }
+            ScriptLanguage.SWIFT -> {
+                listOf("/usr/bin/env", "swift", scriptFile.absolutePath)
+            }
         }
     }
 }
