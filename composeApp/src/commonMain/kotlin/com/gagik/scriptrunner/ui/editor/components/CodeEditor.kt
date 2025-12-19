@@ -21,11 +21,10 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.gagik.scriptrunner.domain.models.ScriptLanguage
 import com.gagik.scriptrunner.ui.components.AppVerticalScrollbar
 import com.gagik.scriptrunner.ui.editor.EditorEvent
+import com.gagik.scriptrunner.ui.editor.LocalEditorDefaults
 import com.gagik.scriptrunner.ui.editor.logic.CodeSyntaxHighlighter
 import com.gagik.scriptrunner.ui.editor.logic.rememberCodeEditorState
 import com.gagik.scriptrunner.ui.theme.AppTheme
@@ -43,11 +42,12 @@ fun CodeEditor(
     modifier: Modifier = Modifier,
     events: Flow<EditorEvent> = emptyFlow()
 ) {
+    val editorDefaults = LocalEditorDefaults.current
     val state = rememberCodeEditorState()
     val density = LocalDensity.current
 
-    val fontSize = 14.sp
-    val lineHeight = fontSize * 1.6f
+    val fontSize = editorDefaults.fontSize
+    val lineHeight = fontSize * editorDefaults.lineHeightMultiplier
 
     val lineHeightPx = with(density) { lineHeight.toPx() }
     val lineHeightDp = with(density) { lineHeight.toDp() }
@@ -56,7 +56,11 @@ fun CodeEditor(
         events.collect { event ->
             when (event) {
                 is EditorEvent.ScrollToLine -> {
-                    state.scrollToLine(event.line, lineHeightPx)
+                    state.scrollToLine(
+                        line = event.line,
+                        lineHeightPx = lineHeightPx,
+                        highlightDurationMillis = editorDefaults.highlightDurationMillis
+                    )
                 }
             }
         }
@@ -76,10 +80,10 @@ fun CodeEditor(
         CodeSyntaxHighlighter(language)
     }
 
-    val highlightColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+    val highlightColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = editorDefaults.highlightAlpha)
     val animatedHighlightColor by animateColorAsState(
         targetValue = if (state.highlightedLine != null) highlightColor else Color.Transparent,
-        animationSpec = tween(durationMillis = 300)
+        animationSpec = tween(durationMillis = editorDefaults.animationDurationMillis)
     )
 
     Surface(
@@ -87,6 +91,7 @@ fun CodeEditor(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
     ) {
+
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val lineCount = text.count { it == '\n' } + 1
             val viewportHeight = constraints.maxHeight.toFloat()
@@ -134,7 +139,7 @@ fun CodeEditor(
                                 )
                             }
                         }
-                        .padding(start = 8.dp),
+                        .padding(start = editorDefaults.contentPadding),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
                     decorationBox = { inner -> inner() }
                 )

@@ -12,18 +12,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.LinkAnnotation
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withLink
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.gagik.scriptrunner.presentation.models.ConsoleUiLine
+import com.gagik.scriptrunner.ui.output.LocalConsoleDefaults
 import com.gagik.scriptrunner.ui.theme.AppTheme
+import com.gagik.scriptrunner.ui.theme.ConsoleTheme
 import com.gagik.scriptrunner.ui.theme.getJetBrainsMonoFontFamily
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -33,6 +27,7 @@ fun Console(
     onJumpToLine: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val consoleDefaults = LocalConsoleDefaults.current
     val listState = rememberLazyListState()
 
     LaunchedEffect(outputLines.size) {
@@ -48,7 +43,7 @@ fun Console(
     ) {
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize().padding(8.dp)
+            modifier = Modifier.fillMaxSize().padding(consoleDefaults.contentPadding)
         ) {
             items(outputLines) { line ->
                 ConsoleLine(
@@ -65,7 +60,9 @@ private fun ConsoleLine(
     line: ConsoleUiLine,
     onJumpToLine: (Int) -> Unit
 ) {
+    val defaults = LocalConsoleDefaults.current
     val fontFamily = getJetBrainsMonoFontFamily()
+    val colors = ConsoleTheme.colors
 
     val annotatedString = buildAnnotatedString {
         if (line.type == ConsoleUiLine.Type.ERROR && line.linkRange != null && line.targetLineNumber != null) {
@@ -76,7 +73,7 @@ private fun ConsoleLine(
                 tag = "error_link",
                 styles = TextLinkStyles(
                     style = SpanStyle(
-                        color = Color(0xFF569CD6),
+                        color = colors.link,
                         textDecoration = TextDecoration.Underline
                     )
                 ),
@@ -88,15 +85,15 @@ private fun ConsoleLine(
             }
 
             val errorDescription = line.text.substring(line.linkRange.last + 1)
-            withStyle(SpanStyle(color = Color(0xFFFF6B68))) {
+            withStyle(SpanStyle(color = colors.stderr)) {
                 append(errorDescription)
             }
 
         } else {
             val baseColor = when (line.type) {
-                ConsoleUiLine.Type.ERROR -> Color(0xFFFF6B68)
-                ConsoleUiLine.Type.SYSTEM -> Color(0xFF888888)
-                else -> Color(0xFFBBBBBB)
+                ConsoleUiLine.Type.ERROR -> colors.stderr
+                ConsoleUiLine.Type.SYSTEM -> colors.system
+                else -> colors.stdout
             }
             withStyle(SpanStyle(color = baseColor)) {
                 append(line.text)
@@ -106,8 +103,8 @@ private fun ConsoleLine(
 
     Text(
         text = annotatedString,
-        fontSize = 13.sp,
-        lineHeight = 20.sp,
+        fontSize = defaults.fontSize,
+        lineHeight = defaults.lineHeight,
         fontFamily = fontFamily
     )
 }

@@ -12,8 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.gagik.scriptrunner.ui.modifiers.resizeCursor
+import com.gagik.scriptrunner.ui.theme.Dimens
 
 @Composable
 fun DraggableDivider(
@@ -21,8 +21,8 @@ fun DraggableDivider(
     onResize: (Float) -> Unit,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.outline,
-    thickness: Dp = 1.dp,
-    touchTargetSize: Dp = 12.dp
+    thickness: Dp = Dimens.DividerThickness,
+    touchTargetSize: Dp = Dimens.DividerTouchTarget
 ) {
     val isVerticalDrag = orientation == Orientation.Vertical
 

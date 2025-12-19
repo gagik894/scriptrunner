@@ -3,45 +3,25 @@ package com.gagik.scriptrunner.ui.editor.components
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuDefaults
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.gagik.scriptrunner.domain.models.RunState
 import com.gagik.scriptrunner.domain.models.ScriptLanguage
 import com.gagik.scriptrunner.ui.theme.AppTheme
+import com.gagik.scriptrunner.ui.theme.ConsoleTheme
+import com.gagik.scriptrunner.ui.theme.Dimens
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -54,12 +34,12 @@ fun EditorHeader(
     onStopClick: () -> Unit,
 ) {
     Surface(
-        tonalElevation = 4.dp,
+        tonalElevation = Dimens.HeaderElevation,
     ) {
         Row(
             modifier = modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = Dimens.HeaderPaddingHorizontal, vertical = Dimens.HeaderPaddingVertical),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -73,7 +53,7 @@ fun EditorHeader(
                 onLanguageSelected = onLanguageSelected,
                 selectedLanguage = selectedLanguage,
             )
-            Spacer(Modifier.width(16.dp))
+            Spacer(Modifier.width(Dimens.SpacerLarge))
             RunStopButton(
                 runState = runState,
                 onRunClick = onRunClick,
@@ -92,27 +72,28 @@ private fun RunStopButton(
     onRunClick: () -> Unit,
     onStopClick: () -> Unit
 ) {
+    val colors = ConsoleTheme.colors
     val (icon, containerColor, label) = when (runState) {
         RunState.IDLE -> Triple(Icons.Default.PlayArrow, MaterialTheme.colorScheme.primary, "Run")
         RunState.RUNNING -> Triple(Icons.Default.Stop, MaterialTheme.colorScheme.error, "Stop")
-        RunState.STOPPING -> Triple(Icons.Default.Stop, Color.Gray, "Stopping")
+        RunState.STOPPING -> Triple(Icons.Default.Stop, colors.stopping, "Stopping")
     }
 
     Button(
         onClick = if (runState == RunState.RUNNING) onStopClick else onRunClick,
         enabled = runState != RunState.STOPPING,
         colors = ButtonDefaults.buttonColors(containerColor = containerColor),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
-        modifier = modifier.height(36.dp)
+        contentPadding = PaddingValues(horizontal = Dimens.HeaderPaddingHorizontal, vertical = 0.dp),
+        modifier = modifier.height(Dimens.ButtonHeight)
     ) {
         Crossfade(targetState = icon) { targetIcon ->
             Icon(
                 imageVector = targetIcon,
                 contentDescription = null,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(Dimens.IconSizeSmall)
             )
         }
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(Dimens.SpacerMedium))
         Text(text = label)
     }
 }
@@ -129,16 +110,16 @@ private fun LanguageSelector(
     Box(modifier = modifier) {
         Row(
             modifier = Modifier
-                .clip(RoundedCornerShape(4.dp))
+                .clip(RoundedCornerShape(Dimens.CornerRadius))
                 .clickable { expanded = true }
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(horizontal = Dimens.SpacerMedium, vertical = Dimens.SpacerSmall),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = selectedLanguage.name,
                 style = MaterialTheme.typography.labelLarge,
             )
-            Spacer(Modifier.width(4.dp))
+            Spacer(Modifier.width(Dimens.SpacerSmall))
             val rotation by animateFloatAsState(
                 targetValue = if (expanded) 180f else 0f,
                 label = "ArrowRotation"

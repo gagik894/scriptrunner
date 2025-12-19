@@ -39,13 +39,18 @@ class CodeEditorState(
      * Smoothly scrolls to the specified line and briefly highlights it.
      * @param line the line number.
      * @param lineHeightPx The height of a single line in pixels.
+     * @param highlightDurationMillis How long to keep the highlight visible.
      */
-    suspend fun scrollToLine(line: Int, lineHeightPx: Float) {
+    suspend fun scrollToLine(
+        line: Int,
+        lineHeightPx: Float,
+        highlightDurationMillis: Long
+    ) {
         if (lineHeightPx <= 0) return
         highlightedLine = line
         val offset = ((line - 1) * lineHeightPx).toInt()
         verticalScrollState.animateScrollTo(offset)
-        delay(2000)
+        delay(highlightDurationMillis)
         if (highlightedLine == line) {
             highlightedLine = null
         }

@@ -10,13 +10,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.gagik.scriptrunner.domain.models.RunState
+import com.gagik.scriptrunner.ui.output.LocalConsoleDefaults
 import com.gagik.scriptrunner.ui.theme.AppTheme
+import com.gagik.scriptrunner.ui.theme.ConsoleTheme
+import com.gagik.scriptrunner.ui.theme.Dimens
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -25,14 +25,17 @@ fun OutputHeader(
     exitCode: Int?,
     modifier: Modifier = Modifier
 ) {
+    val colors = ConsoleTheme.colors
+    val defaults = LocalConsoleDefaults.current
+
     Surface(
-        tonalElevation = 4.dp,
+        tonalElevation = Dimens.HeaderElevation,
         modifier = modifier
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = Dimens.HeaderPaddingHorizontal, vertical = Dimens.HeaderPaddingVertical),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
@@ -48,16 +51,16 @@ fun OutputHeader(
                 RunState.RUNNING -> {
                     Text(
                         text = "● Running...",
-                        color = Color(0xFFFFC66D),
-                        fontSize = 12.sp,
+                        color = colors.running,
+                        fontSize = defaults.statusFontSize,
                         fontWeight = FontWeight.Medium
                     )
                 }
                 RunState.STOPPING -> {
                     Text(
                         text = "Stopping...",
-                        color = Color.Gray,
-                        fontSize = 12.sp
+                        color = colors.stopping,
+                        fontSize = defaults.statusFontSize
                     )
                 }
                 RunState.IDLE -> {
@@ -65,8 +68,8 @@ fun OutputHeader(
                         val isSuccess = exitCode == 0
                         Text(
                             text = "Process finished with exit code $exitCode",
-                            color = if (isSuccess) Color(0xFF6A8759) else Color(0xFFFF6B68),
-                            fontSize = 12.sp
+                            color = if (isSuccess) colors.success else colors.stderr,
+                            fontSize = defaults.statusFontSize
                         )
                     }
                 }

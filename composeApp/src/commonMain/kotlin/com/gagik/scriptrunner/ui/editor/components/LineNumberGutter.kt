@@ -17,6 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.gagik.scriptrunner.ui.editor.LocalEditorDefaults
+import com.gagik.scriptrunner.ui.theme.Dimens
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
@@ -31,10 +33,11 @@ fun LineNumberGutter(
     onLineNumberClick: (Int) -> Unit,
     highlightedLine: Int? = null
 ) {
+    val defaults = LocalEditorDefaults.current
     val endLineIndex = (firstVisibleLineIndex + visibleLineCount).coerceAtMost(lineCount)
 
     Layout(
-        modifier = modifier.width(40.dp),
+        modifier = modifier.width(defaults.gutterWidth),
         content = {
             for (i in firstVisibleLineIndex until endLineIndex) {
                 LineNumber(
@@ -77,9 +80,10 @@ private fun LineNumber(
     onClick: () -> Unit,
     isHighlighted: Boolean
 ) {
+    val defaults = LocalEditorDefaults.current
     val backgroundColor by animateColorAsState(
-        targetValue = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else Color.Transparent,
-        animationSpec = tween(durationMillis = 300)
+        targetValue = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = defaults.gutterHighlightAlpha) else Color.Transparent,
+        animationSpec = tween(durationMillis = defaults.animationDurationMillis)
     )
 
     Box(
@@ -97,7 +101,7 @@ private fun LineNumber(
             ),
             modifier = Modifier
                 .align(androidx.compose.ui.Alignment.CenterEnd)
-                .padding(end = 4.dp),
+                .padding(end = Dimens.SpacerSmall),
             textAlign = TextAlign.End
         )
     }

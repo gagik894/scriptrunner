@@ -1,19 +1,11 @@
 package com.gagik.scriptrunner.ui.components
 
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
+import com.gagik.scriptrunner.ui.theme.Dimens
 
 /**
  * A responsive split layout that displays two panes separated by a draggable divider.
@@ -37,7 +29,7 @@ fun ResponsiveSplitLayout(
     var primaryWeight by remember { mutableStateOf(0.5f) }
 
     BoxWithConstraints(modifier = modifier) {
-        val isCompact = maxWidth < 800.dp
+        val isCompact = maxWidth < Dimens.CompactBreakpoint
 
         val totalSizePx = with(density) {
             if (isCompact) maxHeight.toPx() else maxWidth.toPx()

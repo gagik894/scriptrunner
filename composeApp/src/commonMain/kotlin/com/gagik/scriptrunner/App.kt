@@ -2,11 +2,7 @@ package com.gagik.scriptrunner
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.gagik.scriptrunner.data.ScriptExecutorImpl
 import com.gagik.scriptrunner.domain.usecase.RunScriptUseCase
@@ -15,13 +11,13 @@ import com.gagik.scriptrunner.presentation.MainIntent
 import com.gagik.scriptrunner.presentation.MainState
 import com.gagik.scriptrunner.presentation.MainViewModel
 import com.gagik.scriptrunner.ui.components.ResponsiveSplitLayout
+import com.gagik.scriptrunner.ui.editor.EditorEvent
 import com.gagik.scriptrunner.ui.editor.EditorPane
 import com.gagik.scriptrunner.ui.output.OutputPane
 import com.gagik.scriptrunner.ui.theme.AppTheme
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flowOf
-import com.gagik.scriptrunner.ui.editor.EditorEvent
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -30,7 +26,7 @@ fun App() {
     val runScriptUseCase = remember { RunScriptUseCase(scriptRunner) }
     val viewModel = remember { MainViewModel(runScriptUseCase) }
     val state by viewModel.state.collectAsState()
-    AppTheme(darkTheme = true) {
+    AppTheme(darkTheme = false) {
         MainScreen(
             state = state,
             effects = viewModel.effects,
