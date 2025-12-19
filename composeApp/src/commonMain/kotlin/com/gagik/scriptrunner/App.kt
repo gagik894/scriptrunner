@@ -1,6 +1,7 @@
 package com.gagik.scriptrunner
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,6 +46,7 @@ fun MainScreen(
     onIntent: (MainIntent) -> Unit
 ) {
     val editorEvents = remember { MutableSharedFlow<EditorEvent>(extraBufferCapacity = 1) }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         effects.collect { effect ->
@@ -53,7 +55,7 @@ fun MainScreen(
                     editorEvents.emit(EditorEvent.ScrollToLine(effect.lineNumber))
                 }
                 is MainEffect.ShowErrorToast -> {
-                    //TODO: Implement error toast
+                    snackbarHostState.showSnackbar(effect.message)
                 }
             }
         }
