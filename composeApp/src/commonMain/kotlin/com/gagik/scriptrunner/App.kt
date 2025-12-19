@@ -3,10 +3,8 @@ package com.gagik.scriptrunner
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import com.gagik.scriptrunner.data.ScriptExecutorImpl
-import com.gagik.scriptrunner.domain.usecase.RunScriptUseCase
+import com.gagik.scriptrunner.di.appModule
 import com.gagik.scriptrunner.presentation.MainEffect
 import com.gagik.scriptrunner.presentation.MainIntent
 import com.gagik.scriptrunner.presentation.MainState
@@ -20,21 +18,23 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.KoinApplication
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun App() {
-    val scriptRunner = rememberSaveable { ScriptExecutorImpl() }
-    val runScriptUseCase = rememberSaveable { RunScriptUseCase(scriptRunner) }
-    val viewModel = rememberSaveable { MainViewModel(runScriptUseCase) }
-    val state by viewModel.state.collectAsState()
+    KoinApplication(application = { modules(appModule) }) {
+        val viewModel = koinViewModel<MainViewModel>()
+        val state by viewModel.state.collectAsState()
 
-    AppTheme(darkTheme = state.isDarkTheme) {
-        MainScreen(
-            state = state,
-            effects = viewModel.effects,
-            onIntent = viewModel::onIntent,
-            onThemeToggle = { viewModel.onIntent(MainIntent.ToggleTheme) }
-        )
+        AppTheme(darkTheme = state.isDarkTheme) {
+            MainScreen(
+                state = state,
+                effects = viewModel.effects,
+                onIntent = viewModel::onIntent,
+                onThemeToggle = { viewModel.onIntent(MainIntent.ToggleTheme) }
+            )
+        }
     }
 }
 
