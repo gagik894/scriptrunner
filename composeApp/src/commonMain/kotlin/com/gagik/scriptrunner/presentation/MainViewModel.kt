@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.gagik.scriptrunner.domain.models.RunState
 import com.gagik.scriptrunner.domain.models.ScriptLanguage
 import com.gagik.scriptrunner.domain.models.ScriptOutput
+import com.gagik.scriptrunner.domain.provider.ScriptTemplateProvider
 import com.gagik.scriptrunner.domain.usecase.RunScriptUseCase
 import com.gagik.scriptrunner.presentation.mappers.OutputMapper
 import com.gagik.scriptrunner.presentation.models.ConsoleUiLine
@@ -23,13 +24,7 @@ class MainViewModel(
 
     private val _state = MutableStateFlow(
         MainState(
-            code = """
-            fun main() {
-                println("Hello from Kotlin!")
-                Thread.sleep(1000)
-                println("Done.")
-            }
-        """.trimIndent(),
+            code = ScriptTemplateProvider.getTemplate(ScriptLanguage.KOTLIN),
             language = ScriptLanguage.KOTLIN
         )
     )
@@ -68,10 +63,7 @@ class MainViewModel(
 
 
     private fun updateLanguage(newLanguage: ScriptLanguage) {
-        val template = when (newLanguage) {
-            ScriptLanguage.KOTLIN -> "fun main() {\n    println(\"Hello Kotlin\")\n}"
-            ScriptLanguage.SWIFT -> "print(\"Hello Swift\")"
-        }
+        val template = ScriptTemplateProvider.getTemplate(newLanguage)
         _state.update { it.copy(language = newLanguage, code = template) }
     }
 
