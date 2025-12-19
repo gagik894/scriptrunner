@@ -2,6 +2,7 @@ package com.gagik.scriptrunner.presentation
 
 import com.gagik.scriptrunner.domain.models.RunState
 import com.gagik.scriptrunner.domain.models.ScriptLanguage
+import com.gagik.scriptrunner.presentation.models.ConsoleUiLine
 
 data class MainState(
     // Editor Data
@@ -11,5 +12,5 @@ data class MainState(
     // Execution Data
     val runState: RunState = RunState.IDLE,
     val exitCode: Int? = null,
-    val outputLines: List<String> = emptyList()
+    val outputLines: List<ConsoleUiLine> = emptyList(),
 )

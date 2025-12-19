@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.gagik.scriptrunner.domain.models.RunState
+import com.gagik.scriptrunner.presentation.models.ConsoleUiLine
 import com.gagik.scriptrunner.ui.output.components.Console
 import com.gagik.scriptrunner.ui.output.components.OutputHeader
 
@@ -13,7 +14,7 @@ import com.gagik.scriptrunner.ui.output.components.OutputHeader
 fun OutputPane(
     runState: RunState,
     exitCode: Int?,
-    outputLines: List<String>,
+    outputLines: List<ConsoleUiLine>,
     onJumpToLine: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {

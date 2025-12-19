@@ -5,7 +5,30 @@ package com.gagik.scriptrunner.domain.models
  * This is a sealed class, which means all possible output types are defined within this file.
  */
 sealed class ScriptOutput {
-    data class Line(val text: String) : ScriptOutput()
+
+    /**
+     * Represents a line of output from a running script.
+     * @param text The text of the line of output.
+     * @param isStdErr Indicates whether the line of output is from standard error (stderr).
+     * @param linkRange The range of characters in the line of output that are clickable links.
+     * @param targetLineNumber The line number in the script that the link points to.
+     */
+    data class Line(
+        val text: String,
+        val isStdErr: Boolean,
+        val linkRange: IntRange? = null,
+        val targetLineNumber: Int? = null
+    ) : ScriptOutput()
+
+    /**
+     * Represents an error that occurred while running a script.
+     * @param message The error message.
+     */
     data class Error(val message: String) : ScriptOutput()
+
+    /**
+     * Represents the exit code of a running script.
+     * @param code The exit code.
+     */
     data class Exit(val code: Int) : ScriptOutput()
 }

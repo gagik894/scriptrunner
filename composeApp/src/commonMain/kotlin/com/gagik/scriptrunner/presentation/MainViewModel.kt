@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gagik.scriptrunner.domain.models.RunState
 import com.gagik.scriptrunner.domain.models.ScriptLanguage
+import com.gagik.scriptrunner.domain.models.ScriptOutput
+import com.gagik.scriptrunner.domain.usecase.RunScriptUseCase
+import com.gagik.scriptrunner.presentation.models.ConsoleUiLine
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +15,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class MainViewModel : ViewModel() {
+class MainViewModel(
+    private val runScriptUseCase: RunScriptUseCase
+) : ViewModel() {
+
     private val _state = MutableStateFlow(
         MainState(
             code = """
@@ -69,7 +75,7 @@ class MainViewModel : ViewModel() {
 
     private fun runScript() {
         if (_state.value.runState != RunState.IDLE) return
-
+        val currentState = _state.value
         _state.update {
             it.copy(
                 runState = RunState.RUNNING,
@@ -79,7 +85,62 @@ class MainViewModel : ViewModel() {
         }
 
         executionJob = viewModelScope.launch {
-            //TODO: Implement script execution
+            runScriptUseCase(currentState.code, currentState.language)
+                .collect { output ->
+                    handleScriptOutput(output)
+                }
+        }
+    }
+
+    private fun handleScriptOutput(output: ScriptOutput) {
+        val uiLine = when (output) {
+            is ScriptOutput.Line -> {
+                ConsoleUiLine(
+                    text = output.text,
+                    type = if (output.isStdErr) ConsoleUiLine.Type.ERROR else ConsoleUiLine.Type.NORMAL,
+                    linkRange = output.linkRange,
+                    targetLineNumber = output.targetLineNumber
+                )
+            }
+
+            is ScriptOutput.Error -> {
+                ConsoleUiLine(
+                    text = output.message,
+                    type = ConsoleUiLine.Type.ERROR
+                )
+            }
+
+            is ScriptOutput.Exit -> {
+                ConsoleUiLine(
+                    text = "Process finished with exit code ${output.code}",
+                    type = ConsoleUiLine.Type.SYSTEM
+                )
+            }
+        }
+
+        _state.update {
+            it.copy(outputLines = it.outputLines + uiLine)
+        }
+
+        when (output) {
+            is ScriptOutput.Exit -> {
+                _state.update {
+                    it.copy(runState = RunState.IDLE, exitCode = output.code)
+                }
+            }
+
+            is ScriptOutput.Error -> {
+                _state.update {
+                    it.copy(
+                        runState = RunState.IDLE,
+                        exitCode = -1
+                    )
+                }
+            }
+
+            else -> {
+                // Running... do nothing
+            }
         }
     }
 
@@ -92,7 +153,10 @@ class MainViewModel : ViewModel() {
             _state.update {
                 it.copy(
                     runState = RunState.IDLE,
-                    outputLines = it.outputLines + "\n[Terminated by user]",
+                    outputLines = it.outputLines + ConsoleUiLine(
+                        text = "Script execution stopped.",
+                        type = ConsoleUiLine.Type.SYSTEM
+                    ),
                     exitCode = 130
                 )
             }

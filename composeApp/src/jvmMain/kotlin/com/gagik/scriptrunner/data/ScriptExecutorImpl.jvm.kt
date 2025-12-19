@@ -4,11 +4,11 @@ import com.gagik.scriptrunner.domain.models.ScriptLanguage
 import com.gagik.scriptrunner.domain.models.ScriptOutput
 import com.gagik.scriptrunner.domain.repository.ScriptExecutor
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.nio.charset.StandardCharsets
@@ -24,7 +24,7 @@ actual class ScriptExecutorImpl actual constructor() : ScriptExecutor {
     actual override fun execute(
         code: String,
         language: ScriptLanguage
-    ): Flow<ScriptOutput> = flow {
+    ): Flow<ScriptOutput> = channelFlow {
         var process: Process? = null
         val tempFile = createTempFileForScript(code, language)
 
@@ -32,30 +32,41 @@ actual class ScriptExecutorImpl actual constructor() : ScriptExecutor {
             val command = getCommandForLanguage(language, tempFile)
 
             val processBuilder = ProcessBuilder(command).apply {
-                redirectErrorStream(true)
+                redirectErrorStream(false)
                 directory(tempFile.parentFile)
             }
 
             process = processBuilder.start()
 
-            process.inputStream.bufferedReader().use { reader ->
-                var line: String? = reader.readLine()
-                while (line != null) {
-                    currentCoroutineContext().ensureActive()
-                    emit(ScriptOutput.Line(line))
-                    line = reader.readLine()
+            launch(Dispatchers.IO) {
+                process.inputStream.bufferedReader().use { reader ->
+                    while (isActive) {
+                        val line = reader.readLine() ?: break
+                        // Emit as Normal Line
+                        send(ScriptOutput.Line(text = line, isStdErr = false))
+                    }
+                }
+            }
+
+            launch(Dispatchers.IO) {
+                process.errorStream.bufferedReader().use { reader ->
+                    while (isActive) {
+                        val line = reader.readLine() ?: break
+                        // Emit as Error Line
+                        send(ScriptOutput.Line(text = line, isStdErr = true))
+                    }
                 }
             }
 
             val exitCode = process.waitFor()
-            emit(ScriptOutput.Exit(exitCode))
+            send(ScriptOutput.Exit(exitCode))
 
         } catch (e: kotlinx.coroutines.CancellationException) {
             throw e
         } catch (e: IOException) {
-            emit(ScriptOutput.Error(e.message ?: "Unknown I/O Error"))
+            send(ScriptOutput.Error(e.message ?: "Unknown I/O Error"))
         } catch (e: Exception) {
-            emit(ScriptOutput.Error("An unexpected error occurred: ${e.message}"))
+            send(ScriptOutput.Error("An unexpected error occurred: ${e.message}"))
         } finally {
             runCatching { tempFile.delete() }
             runCatching { process?.destroyForcibly() }

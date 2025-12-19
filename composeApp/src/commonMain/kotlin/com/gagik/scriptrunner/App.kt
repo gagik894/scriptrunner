@@ -7,6 +7,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.gagik.scriptrunner.data.ScriptExecutorImpl
+import com.gagik.scriptrunner.domain.usecase.RunScriptUseCase
 import com.gagik.scriptrunner.presentation.MainEffect
 import com.gagik.scriptrunner.presentation.MainIntent
 import com.gagik.scriptrunner.presentation.MainState
@@ -21,7 +23,9 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun App() {
-    val viewModel = remember { MainViewModel() }
+    val scriptRunner = remember { ScriptExecutorImpl() }
+    val runScriptUseCase = remember { RunScriptUseCase(scriptRunner) }
+    val viewModel = remember { MainViewModel(runScriptUseCase) }
     val state by viewModel.state.collectAsState()
     AppTheme(darkTheme = true) {
         MainScreen(
@@ -69,7 +73,7 @@ fun MainScreen(
             OutputPane(
                 runState = state.runState,
                 exitCode = state.exitCode,
-                outputLines = state.outputLines,
+                outputLines = emptyList(),
                 onJumpToLine = { onIntent(MainIntent.JumpToLine(it)) },
                 modifier = Modifier.fillMaxSize()
             )
@@ -84,7 +88,6 @@ fun MainScreenPreview() {
         MainScreen(
             state = MainState(
                 code = "fun main() {\n    println(\"Preview\")\n}",
-                outputLines = listOf("Compiling...", "Hello Preview")
             ),
             effects = flowOf(),
             onIntent = {}
