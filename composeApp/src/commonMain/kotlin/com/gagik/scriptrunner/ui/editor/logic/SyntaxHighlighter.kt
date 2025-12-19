@@ -11,7 +11,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.gagik.scriptrunner.domain.models.ScriptLanguage
 
 class CodeSyntaxHighlighter(
-    private val language: ScriptLanguage
+    language: ScriptLanguage
 ) : VisualTransformation {
 
     private val keywords = when (language) {
@@ -35,8 +35,6 @@ class CodeSyntaxHighlighter(
         "FUNCTION" to SpanStyle(color = Color(0xFFFFC66D)),
         "VARIABLE" to SpanStyle(color = Color(0xFF4C4AE7))
     )
-
-    private val defaultStyle = SpanStyle(color = Color(0xFFD4D4D4))
 
     private val regex = Regex(
         // Strings (matches "...")

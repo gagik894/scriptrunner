@@ -18,7 +18,9 @@ import com.gagik.scriptrunner.ui.editor.EditorPane
 import com.gagik.scriptrunner.ui.output.OutputPane
 import com.gagik.scriptrunner.ui.theme.AppTheme
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flowOf
+import com.gagik.scriptrunner.ui.editor.EditorEvent
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -42,11 +44,13 @@ fun MainScreen(
     effects: Flow<MainEffect>,
     onIntent: (MainIntent) -> Unit
 ) {
+    val editorEvents = remember { MutableSharedFlow<EditorEvent>(extraBufferCapacity = 1) }
+
     LaunchedEffect(Unit) {
         effects.collect { effect ->
             when (effect) {
                 is MainEffect.ScrollToLine -> {
-                    //TODO: Implement scroll to line in editor
+                    editorEvents.emit(EditorEvent.ScrollToLine(effect.lineNumber))
                 }
                 is MainEffect.ShowErrorToast -> {
                     //TODO: Implement error toast
@@ -66,7 +70,8 @@ fun MainScreen(
                 onLanguageChange = { onIntent(MainIntent.ChangeLanguage(it)) },
                 onRun = { onIntent(MainIntent.RunScript) },
                 onStop = { onIntent(MainIntent.StopScript) },
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                events = editorEvents
             )
         },
         secondaryContent = {

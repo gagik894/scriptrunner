@@ -8,6 +8,8 @@ import com.gagik.scriptrunner.domain.models.RunState
 import com.gagik.scriptrunner.domain.models.ScriptLanguage
 import com.gagik.scriptrunner.ui.editor.components.CodeEditor
 import com.gagik.scriptrunner.ui.editor.components.EditorHeader
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun EditorPane(
@@ -18,7 +20,8 @@ fun EditorPane(
     onLanguageChange: (ScriptLanguage) -> Unit,
     onRun: () -> Unit,
     onStop: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    events: Flow<EditorEvent> = emptyFlow()
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         EditorHeader(
@@ -33,7 +36,8 @@ fun EditorPane(
             text = text,
             onValueChange = onTextChange,
             language = selectedLanguage,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            events = events
         )
     }
 }

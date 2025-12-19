@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,10 +29,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gagik.scriptrunner.domain.models.ScriptLanguage
 import com.gagik.scriptrunner.ui.components.AppVerticalScrollbar
+import com.gagik.scriptrunner.ui.editor.EditorEvent
 import com.gagik.scriptrunner.ui.editor.logic.CodeSyntaxHighlighter
 import com.gagik.scriptrunner.ui.editor.logic.rememberCodeEditorState
 import com.gagik.scriptrunner.ui.theme.AppTheme
 import com.gagik.scriptrunner.ui.theme.getJetBrainsMonoFontFamily
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 
@@ -40,7 +44,8 @@ fun CodeEditor(
     text: String,
     onValueChange: (String) -> Unit,
     language: ScriptLanguage,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    events: Flow<EditorEvent> = emptyFlow()
 ) {
     val state = rememberCodeEditorState()
     val density = LocalDensity.current
@@ -50,6 +55,17 @@ fun CodeEditor(
 
     val lineHeightPx = with(density) { lineHeight.toPx() }
     val lineHeightDp = with(density) { lineHeight.toDp() }
+
+    LaunchedEffect(events, lineHeightPx) {
+        events.collect { event ->
+            when (event) {
+                is EditorEvent.ScrollToLine -> {
+                    state.scrollToLine(event.line, lineHeightPx)
+                }
+            }
+        }
+    }
+
     val jetBrainsMono = getJetBrainsMonoFontFamily()
 
     val commonTextStyle = TextStyle(
@@ -118,7 +134,6 @@ fun CodeEditor(
         }
     }
 }
-
 
 private val sampleText = $$"""
     // Sample Kotlin snippet

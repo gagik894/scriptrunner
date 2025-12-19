@@ -11,6 +11,14 @@ class CodeEditorState(
     val verticalScrollState: ScrollState,
     val horizontalScrollState: ScrollState
 ) {
+    /**
+     * Calculates the visible window of lines based on the current scroll position and viewport size.
+     * @param lineHeightPx The height of a single line in pixels.
+     * @param scrollOffsetPx The current vertical scroll offset in pixels.
+     * @param viewportHeightPx The height of the viewport in pixels.
+     * @return A pair where the first element is the index of the first visible line,
+     *         and the second element is the number of visible lines plus a buffer.
+     */
     fun getVisibleWindow(
         lineHeightPx: Float,
         scrollOffsetPx: Int,
@@ -22,6 +30,17 @@ class CodeEditorState(
         val visibleCount = (viewportHeightPx / lineHeightPx).toInt() + 4
 
         return firstVisibleLine to visibleCount
+    }
+
+    /**
+     * Smoothly scrolls to the specified line.
+     * @param line the line number.
+     * @param lineHeightPx The height of a single line in pixels.
+     */
+    suspend fun scrollToLine(line: Int, lineHeightPx: Float) {
+        if (lineHeightPx <= 0) return
+        val offset = ((line - 1) * lineHeightPx).toInt()
+        verticalScrollState.animateScrollTo(offset)
     }
 }
 
