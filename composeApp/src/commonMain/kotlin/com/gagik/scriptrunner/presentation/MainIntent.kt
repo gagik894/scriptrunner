@@ -8,4 +8,6 @@ sealed class MainIntent {
     data object RunScript : MainIntent()
     data object StopScript : MainIntent()
     data class JumpToLine(val line: Int) : MainIntent()
+
+    data object ToggleTheme : MainIntent()
 }

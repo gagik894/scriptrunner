@@ -58,9 +58,17 @@ class MainViewModel(
                     _effects.send(MainEffect.ScrollToLine(intent.line))
                 }
             }
+
+            is MainIntent.ToggleTheme -> {
+                toggleTheme()
+            }
         }
     }
 
+
+    private fun toggleTheme() {
+        _state.update { it.copy(isDarkTheme = !it.isDarkTheme) }
+    }
 
     private fun updateLanguage(newLanguage: ScriptLanguage) {
         val template = ScriptTemplateProvider.getTemplate(newLanguage)

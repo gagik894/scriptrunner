@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.gagik.scriptrunner.domain.models.RunState
 import com.gagik.scriptrunner.domain.models.ScriptLanguage
+import com.gagik.scriptrunner.ui.components.ThemeSwitcher
 import com.gagik.scriptrunner.ui.theme.AppTheme
 import com.gagik.scriptrunner.ui.theme.ConsoleTheme
 import com.gagik.scriptrunner.ui.theme.Dimens
@@ -32,6 +33,8 @@ fun EditorHeader(
     onLanguageSelected: (ScriptLanguage) -> Unit,
     onRunClick: () -> Unit,
     onStopClick: () -> Unit,
+    isDarkTheme: Boolean = true,
+    onThemeToggle: () -> Unit = {}
 ) {
     Surface(
         tonalElevation = Dimens.HeaderElevation,
@@ -52,6 +55,11 @@ fun EditorHeader(
             LanguageSelector(
                 onLanguageSelected = onLanguageSelected,
                 selectedLanguage = selectedLanguage,
+            )
+            Spacer(Modifier.width(Dimens.SpacerMedium))
+            ThemeSwitcher(
+                isDarkTheme = isDarkTheme,
+                onToggle = onThemeToggle
             )
             Spacer(Modifier.width(Dimens.SpacerLarge))
             RunStopButton(

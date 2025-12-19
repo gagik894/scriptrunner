@@ -5,6 +5,9 @@ import com.gagik.scriptrunner.domain.models.ScriptLanguage
 import com.gagik.scriptrunner.presentation.models.ConsoleUiLine
 
 data class MainState(
+    // UI Data
+    val isDarkTheme: Boolean = true,
+
     // Editor Data
     val code: String = "",
     val language: ScriptLanguage = ScriptLanguage.KOTLIN,

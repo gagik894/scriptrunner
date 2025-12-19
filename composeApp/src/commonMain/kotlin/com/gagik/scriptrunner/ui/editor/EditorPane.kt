@@ -20,6 +20,8 @@ fun EditorPane(
     onLanguageChange: (ScriptLanguage) -> Unit,
     onRun: () -> Unit,
     onStop: () -> Unit,
+    isDarkTheme: Boolean = true,
+    onThemeToggle: () -> Unit = {},
     modifier: Modifier = Modifier,
     events: Flow<EditorEvent> = emptyFlow()
 ) {
@@ -29,7 +31,9 @@ fun EditorPane(
             selectedLanguage = selectedLanguage,
             onLanguageSelected = onLanguageChange,
             onRunClick = onRun,
-            onStopClick = onStop
+            onStopClick = onStop,
+            isDarkTheme = isDarkTheme,
+            onThemeToggle = onThemeToggle
         )
 
         CodeEditor(

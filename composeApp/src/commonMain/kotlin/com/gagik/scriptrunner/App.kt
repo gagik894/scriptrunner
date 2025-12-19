@@ -3,6 +3,7 @@ package com.gagik.scriptrunner
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import com.gagik.scriptrunner.data.ScriptExecutorImpl
 import com.gagik.scriptrunner.domain.usecase.RunScriptUseCase
@@ -22,15 +23,17 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun App() {
-    val scriptRunner = remember { ScriptExecutorImpl() }
-    val runScriptUseCase = remember { RunScriptUseCase(scriptRunner) }
-    val viewModel = remember { MainViewModel(runScriptUseCase) }
+    val scriptRunner = rememberSaveable { ScriptExecutorImpl() }
+    val runScriptUseCase = rememberSaveable { RunScriptUseCase(scriptRunner) }
+    val viewModel = rememberSaveable { MainViewModel(runScriptUseCase) }
     val state by viewModel.state.collectAsState()
-    AppTheme(darkTheme = false) {
+
+    AppTheme(darkTheme = state.isDarkTheme) {
         MainScreen(
             state = state,
             effects = viewModel.effects,
-            onIntent = viewModel::onIntent
+            onIntent = viewModel::onIntent,
+            onThemeToggle = { viewModel.onIntent(MainIntent.ToggleTheme) }
         )
     }
 }
@@ -39,7 +42,8 @@ fun App() {
 fun MainScreen(
     state: MainState,
     effects: Flow<MainEffect>,
-    onIntent: (MainIntent) -> Unit
+    onIntent: (MainIntent) -> Unit,
+    onThemeToggle: () -> Unit = {}
 ) {
     val editorEvents = remember { MutableSharedFlow<EditorEvent>(extraBufferCapacity = 1) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -68,6 +72,8 @@ fun MainScreen(
                 onLanguageChange = { onIntent(MainIntent.ChangeLanguage(it)) },
                 onRun = { onIntent(MainIntent.RunScript) },
                 onStop = { onIntent(MainIntent.StopScript) },
+                isDarkTheme = state.isDarkTheme,
+                onThemeToggle = onThemeToggle,
                 modifier = Modifier.fillMaxSize(),
                 events = editorEvents
             )
