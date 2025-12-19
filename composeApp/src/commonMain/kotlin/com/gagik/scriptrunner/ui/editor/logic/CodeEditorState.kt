@@ -2,15 +2,18 @@ package com.gagik.scriptrunner.ui.editor.logic
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import kotlinx.coroutines.delay
 
 @Stable
 class CodeEditorState(
     val verticalScrollState: ScrollState,
     val horizontalScrollState: ScrollState
 ) {
+    var highlightedLine by mutableStateOf<Int?>(null)
+        private set
+
     /**
      * Calculates the visible window of lines based on the current scroll position and viewport size.
      * @param lineHeightPx The height of a single line in pixels.
@@ -33,14 +36,19 @@ class CodeEditorState(
     }
 
     /**
-     * Smoothly scrolls to the specified line.
+     * Smoothly scrolls to the specified line and briefly highlights it.
      * @param line the line number.
      * @param lineHeightPx The height of a single line in pixels.
      */
     suspend fun scrollToLine(line: Int, lineHeightPx: Float) {
         if (lineHeightPx <= 0) return
+        highlightedLine = line
         val offset = ((line - 1) * lineHeightPx).toInt()
         verticalScrollState.animateScrollTo(offset)
+        delay(2000)
+        if (highlightedLine == line) {
+            highlightedLine = null
+        }
     }
 }
 
@@ -49,7 +57,7 @@ fun rememberCodeEditorState(
     verticalScrollState: ScrollState = rememberScrollState(),
     horizontalScrollState: ScrollState = rememberScrollState()
 ): CodeEditorState {
-    return remember(verticalScrollState, horizontalScrollState) {
+    return rememberSaveable(verticalScrollState, horizontalScrollState) {
         CodeEditorState(verticalScrollState, horizontalScrollState)
     }
 }

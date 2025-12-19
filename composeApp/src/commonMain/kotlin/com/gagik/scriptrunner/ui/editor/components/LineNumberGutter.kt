@@ -1,15 +1,19 @@
 package com.gagik.scriptrunner.ui.editor.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -24,7 +28,8 @@ fun LineNumberGutter(
     visibleLineCount: Int,
     lineHeight: Dp,
     textStyle: TextStyle,
-    onLineNumberClick: (Int) -> Unit
+    onLineNumberClick: (Int) -> Unit,
+    highlightedLine: Int? = null
 ) {
     val endLineIndex = (firstVisibleLineIndex + visibleLineCount).coerceAtMost(lineCount)
 
@@ -36,7 +41,8 @@ fun LineNumberGutter(
                     lineNumber = i + 1,
                     lineHeight = lineHeight,
                     style = textStyle,
-                    onClick = { onLineNumberClick(i + 1) }
+                    onClick = { onLineNumberClick(i + 1) },
+                    isHighlighted = highlightedLine == i + 1
                 )
             }
         }
@@ -68,18 +74,33 @@ private fun LineNumber(
     lineNumber: Int,
     lineHeight: Dp,
     style: TextStyle,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    isHighlighted: Boolean
 ) {
-    Text(
-        text = lineNumber.toString(),
-        style = style,
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isHighlighted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) else Color.Transparent,
+        animationSpec = tween(durationMillis = 300)
+    )
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(lineHeight)
+            .background(backgroundColor)
             .clickable(onClick = onClick)
-            .padding(end = 4.dp),
-        textAlign = TextAlign.End
-    )
+    ) {
+        Text(
+            text = lineNumber.toString(),
+            style = style.copy(
+                fontWeight = if (isHighlighted) FontWeight.Bold else style.fontWeight,
+                color = if (isHighlighted) MaterialTheme.colorScheme.primary else style.color
+            ),
+            modifier = Modifier
+                .align(androidx.compose.ui.Alignment.CenterEnd)
+                .padding(end = 4.dp),
+            textAlign = TextAlign.End
+        )
+    }
 }
 
 @Preview

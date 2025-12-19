@@ -1,26 +1,22 @@
 package com.gagik.scriptrunner.ui.editor.components
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.VerticalDivider
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
@@ -80,12 +76,17 @@ fun CodeEditor(
         CodeSyntaxHighlighter(language)
     }
 
+    val highlightColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+    val animatedHighlightColor by animateColorAsState(
+        targetValue = if (state.highlightedLine != null) highlightColor else Color.Transparent,
+        animationSpec = tween(durationMillis = 300)
+    )
+
     Surface(
         modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
     ) {
-
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val lineCount = text.count { it == '\n' } + 1
             val viewportHeight = constraints.maxHeight.toFloat()
@@ -108,7 +109,8 @@ fun CodeEditor(
                     lineHeight = lineHeightDp,
                     textStyle = commonTextStyle,
                     onLineNumberClick = { },
-                    modifier = Modifier.verticalScroll(state.verticalScrollState)
+                    modifier = Modifier.verticalScroll(state.verticalScrollState),
+                    highlightedLine = state.highlightedLine
                 )
 
                 VerticalDivider(Modifier.fillMaxHeight())
@@ -122,6 +124,16 @@ fun CodeEditor(
                         .weight(1f)
                         .verticalScroll(state.verticalScrollState)
                         .horizontalScroll(state.horizontalScrollState)
+                        .drawBehind {
+                            state.highlightedLine?.let { line ->
+                                val y = (line - 1) * lineHeightPx
+                                drawRect(
+                                    color = animatedHighlightColor,
+                                    topLeft = Offset(0f, y),
+                                    size = Size(size.width, lineHeightPx)
+                                )
+                            }
+                        }
                         .padding(start = 8.dp),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.onSurface),
                     decorationBox = { inner -> inner() }
